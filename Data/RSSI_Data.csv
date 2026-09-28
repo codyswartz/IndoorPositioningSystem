@@ -1,0 +1,13 @@
+timestamp,anchor_id,target_id,rssi_dbm,estimated_distance_m,actual_x_m,actual_y_m,orientation
+,A1,T1,,,,,Facing A1
+,A2,T1,,,,,Facing A1
+,A3,T1,,,,,Facing A1
+,A1,T1,,,,,Facing A2
+,A2,T1,,,,,Facing A2
+,A3,T1,,,,,Facing A2
+,A1,T1,,,,,Facing A3
+,A2,T1,,,,,Facing A3
+,A3,T1,,,,,Facing A3
+,A1,T1,,,,,Facing Away
+,A2,T1,,,,,Facing Away
+,A3,T1,,,,,Facing Away
