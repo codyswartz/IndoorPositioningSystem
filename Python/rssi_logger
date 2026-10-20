@@ -1,0 +1,67 @@
+
+import serial
+import csv
+import re
+from datetime import datetime
+from pathlib import Path
+
+#Receiver port
+PORT = "COM4"
+BAUD_RATE = 115200
+
+#CSV
+PROJECT_FOLDER = Path(__file__).resolve().parent.parent
+DATA_FOLDER = PROJECT_FOLDER / "data"
+CSV_FILE = DATA_FOLDER / "rssi_data.csv"
+
+DATA_FOLDER.mkdir(parents=True, exist_ok=True)
+
+pattern = re.compile(
+    r"(ESP32_Anchor_[123]) RSSI:\s*(-?\d+)\s*dBm"
+)
+
+try:
+    with serial.Serial(PORT, BAUD_RATE, timeout=1) as esp32:
+        print(f"Connected to receiver on {PORT}")
+        print(f"Saving readings to: {CSV_FILE}")
+        print("Collecting data. Press Ctrl+C to stop.")
+
+        new_file = not CSV_FILE.exists() or CSV_FILE.stat().st_size == 0
+
+        with open(CSV_FILE, "a", newline="") as file:
+            writer = csv.writer(file)
+
+            if new_file:
+                writer.writerow([
+                    "timestamp",
+                    "anchor_id",
+                    "rssi_dbm"
+                ])
+
+            while True:
+                line = esp32.readline().decode(
+                    "utf-8", errors="ignore"
+                ).strip()
+
+                match = pattern.search(line)
+
+                if match:
+                    anchor_id = match.group(1)
+                    rssi = int(match.group(2))
+                    timestamp = datetime.now().isoformat(
+                        timespec="seconds"
+                    )
+
+                    writer.writerow([timestamp, anchor_id, rssi])
+                    file.flush()
+
+                    print(
+                        f"{timestamp} | {anchor_id} | {rssi} dBm"
+                    )
+
+except serial.SerialException as error:
+    print(f"Serial connection error: {error}")
+    print("Check COM port and close serial monitor.")
+
+except KeyboardInterrupt:
+    print("\nData collection stopped.")
